@@ -1,13 +1,31 @@
-//import { h, render, Component } from 'preact';
-const io = require('socket.io-client');
+import { h, render, Component } from 'preact';
+const io_client = require('socket.io-client');
+const socket = io_client();
 
-var socket = io();
+class Hello extends Component {
+    constructor() {
+        super();
 
-//const socket = io_client();
-const random = Math.random();
-console.log(`sending ${random}`)
-socket.emit('chat message', `client sez ${Math.random()}`);
+        this.state = { msgs: [] };
 
-socket.on('chat message reply', function(msg){
-    console.log(`received from server: ${msg}`);
-});
+        const random = Math.random();
+        console.log(`sending ${random}`)
+        socket.emit('chat message', `client sez ${Math.random()}`);
+
+        socket.on('chat message reply', (msg) => {
+            const ok = this.state as any;
+            console.log(`received from server: ${msg}`);
+            this.setState({ msgs: [ msg, ...ok.msgs ] })
+        });
+    }
+
+	render({}, { msgs }) {
+        return <div>
+            msgs from server: { msgs.map((msg) => 
+                <div>{ msg }</div>
+            ) }
+        </div>
+	}
+}
+
+render(<Hello />, document.body);
